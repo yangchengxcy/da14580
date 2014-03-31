@@ -187,7 +187,7 @@ void app_button_enable(void)
    	NVIC_DisableIRQ(GPIO3_IRQn);
 
     //Push Button input	
-    GPIO_ConfigurePin( GPIO_PORT_0, GPIO_PIN_6, INPUT_PULLUP, PID_GPIO, false );
+    GPIO_ConfigurePin(XCY_KB_1, INPUT_PULLUP, PID_GPIO, false );
 	
 	SetBits16(GPIO_INT_LEVEL_CTRL_REG, EDGE_LEVELn3, 1); //select falling edge P1.1
 	SetBits16(GPIO_INT_LEVEL_CTRL_REG, INPUT_LEVEL3, 1); //select falling edge P1.1
@@ -202,7 +202,7 @@ void app_button_enable(void)
 void app_led_enable(void)
 {
     // LED Output 
-    GPIO_ConfigurePin( GPIO_PORT_0, GPIO_PIN_7, OUTPUT, PID_GPIO, false );
+    GPIO_ConfigurePin( XCY_LED_GPIO, OUTPUT, PID_GPIO, false );
 }
 
 #if BLE_PREC

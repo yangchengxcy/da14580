@@ -137,7 +137,7 @@ void app_proxr_alert_start(uint8_t lvl)
 		alert_state.blink_timeout = 50;
 	
 	alert_state.blink_toggle = 1;
-    GPIO_SetActive( GPIO_PORT_0, GPIO_PIN_7);
+    GPIO_SetActive(XCY_LED_GPIO);
 	
     ke_timer_set(APP_PXP_TIMER, TASK_APP, alert_state.blink_timeout);	
 }
@@ -158,7 +158,7 @@ void app_proxr_alert_stop(void)
 	alert_state.blink_timeout = 0;
 	alert_state.blink_toggle = 0;
 	
-    GPIO_SetInactive( GPIO_PORT_0, GPIO_PIN_7);
+    GPIO_SetInactive(XCY_LED_GPIO);
 	
     ke_timer_clear(APP_PXP_TIMER, TASK_APP);
 }
@@ -205,10 +205,10 @@ void app_proxr_port_reinit(void)
     app_proxr_init();
 
 	if(alert_state.blink_toggle == 1){
-        GPIO_SetActive( GPIO_PORT_0, GPIO_PIN_7);
+        GPIO_SetActive(XCY_LED_GPIO);
     }
 	else{
-        GPIO_SetInactive( GPIO_PORT_0, GPIO_PIN_7);
+        GPIO_SetInactive(XCY_LED_GPIO);
 	}
 	
 }

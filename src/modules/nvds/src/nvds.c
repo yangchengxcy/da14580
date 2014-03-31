@@ -48,7 +48,7 @@ const struct nvds_data_struct nvds_data_storage __attribute__((section("nvds_dat
     .NVDS_TAG_SECURITY_ENABLE               = 1,
     .NVDS_TAG_APP_BLE_ADV_DATA              = "\x02\x01\x06\x03\x03\xa0\xff",
     .NVDS_TAG_APP_BLE_SCAN_RESP_DATA        = "\x09\xFF\x00\x60\x52\x57\x2D\x42\x4C\x45",
-    .NVDS_TAG_DEVICE_NAME                   = "DA14580",
+    .NVDS_TAG_DEVICE_NAME                   = "MISSMES",
 #if (BLE_HID_DEVICE)    
     .NVDS_TAG_BD_ADDRESS                    = {0xA2, 0xA2, 0x45, 0x55, 0x23, 0x01},
 #elif (BLE_PROX_REPORTER)  
@@ -60,7 +60,7 @@ const struct nvds_data_struct nvds_data_storage __attribute__((section("nvds_dat
 #endif
     .ADV_DATA_TAG_LEN                       = 7,
     .SCAN_RESP_DATA_TAG_LEN                 = 10,	
-    .DEVICE_NAME_TAG_LEN                    = 7,	
+    .DEVICE_NAME_TAG_LEN                    = 7,
 };
 
 #define BDADDR_FROM_OTP 0x7fd4     //OTP address offset with BDADDR

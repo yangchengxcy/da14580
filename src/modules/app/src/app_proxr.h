@@ -137,6 +137,9 @@ void proxr_init_port (void);
 
 void app_proxr_port_reinit(void);
 
+#define XCY_LED_GPIO	GPIO_PORT_0,GPIO_PIN_7
+#define XCY_KB_1		GPIO_PORT_0,GPIO_PIN_6
+
 #endif //BLE_PROX_REPORTER
 
 /// @} APP

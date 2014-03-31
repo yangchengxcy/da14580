@@ -197,12 +197,12 @@ int app_proxr_timer_handler(ke_msg_id_t const msgid,
 		 
 		if (alert_state.blink_toggle)
 		{
-            GPIO_SetInactive( GPIO_PORT_0, GPIO_PIN_7);
+            GPIO_SetInactive(XCY_LED_GPIO);
 			alert_state.blink_toggle = 0;
 		}
 		else
 		{
-            GPIO_SetActive( GPIO_PORT_0, GPIO_PIN_7);
+            GPIO_SetActive(XCY_LED_GPIO);
 			alert_state.blink_toggle = 1;
 		}
 		

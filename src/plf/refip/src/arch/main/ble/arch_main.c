@@ -884,7 +884,7 @@ int main_func(void)
     if ( (app_get_sleep_mode() == 2) || (app_get_sleep_mode() == 1) )
     {
         SetWord16(SET_FREEZE_REG, FRZ_WDOG);            // Stop WDOG until debugger is removed
-        while ((GetWord16(SYS_STAT_REG) & DBG_IS_UP) == DBG_IS_UP) {}; 
+        // while ((GetWord16(SYS_STAT_REG) & DBG_IS_UP) == DBG_IS_UP) {}; 
         SetBits16(SYS_CTRL_REG, DEBUGGER_ENABLE, 0);  // close debugger
     }
 #endif	
