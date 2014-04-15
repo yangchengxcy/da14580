@@ -35,8 +35,8 @@
 #define GPIO_ALERT_LED_PIN      GPIO_PIN_1
 #define GPIO_ALERT_LED1_PIN      GPIO_PIN_2
 
-#define GPIO_BUTTON_PORT        GPIO_PORT_0 
-#define GPIO_BUTTON_PIN         GPIO_PIN_6
+#define GPIO_BUTTON_PORT        GPIO_PORT_2 
+#define GPIO_BUTTON_PIN         GPIO_PIN_3
 
 #define GPIO_BAT_LED_PORT       GPIO_PORT_1 
 #define GPIO_BAT_LED_PIN        GPIO_PIN_0

@@ -77,7 +77,8 @@ void app_button_press_cb(void)
 		
 #endif 
         }
-        
+ 			GPIO_ConfigurePin( GPIO_PORT_1, GPIO_PIN_1, OUTPUT, PID_GPIO, true ); //Alert LED 
+ 			GPIO_ConfigurePin( GPIO_PORT_1, GPIO_PIN_2, OUTPUT, PID_GPIO, true ); //Alert LED 				
         if(GetBits16(SYS_STAT_REG, PER_IS_DOWN))
             periph_init(); 
         
@@ -112,12 +113,14 @@ void app_button_press_cb(void)
  ****************************************************************************************
  */
 
-
 void app_button_enable(void)
 {   
    wkupct_register_callback(app_button_press_cb);
-   if (GPIO_GetPinStatus( GPIO_BUTTON_PORT, GPIO_BUTTON_PIN ))
-        wkupct_enable_irq(0x40, 0x40, 1, 0); // P0_6, polarity low , 1 event, debouncing time = 0
+   if (!(GPIO_GetPinStatus( GPIO_PORT_2, GPIO_PIN_3 )))//0.6
+        wkupct_enable_irq(0x480000, 0x0, 1, 0); // P2_3, polarity low , 1 event, debouncing time = 0
+	 //if (!GPIO_GetPinStatus( GPIO_PORT_2, GPIO_PIN_6 ))//0.6
+      //  wkupct_enable_irq(0x400000, 0x0, 1, 0); // P2_6, polarity low , 1 event, debouncing time = 0
+	 
 }
 
  /**
@@ -206,7 +209,7 @@ void app_connection_func(struct gapc_connection_req_ind const *param)
         #endif //BLE_FINDME_LOCATOR	
         
         #if (BLE_APP_PRESENT)
-        app_dis_enable_prf(app_env.conhdl);
+        //app_dis_enable_prf(app_env.conhdl);   randy 20140414
         #endif
 
         ke_state_set(TASK_APP, APP_CONNECTED);
@@ -466,8 +469,9 @@ void app_configuration_func(ke_task_id_t const task_id, struct gapm_set_dev_conf
 	#else
 		cmd->role = GAP_PERIPHERAL_SLV;
     // Device IRK
-    // cmd->irk = ; TODO NOT set
 	#endif
+	  memset(cmd->irk.key, 0, sizeof(struct gap_sec_key));
+	  //cmd->irk = 0; //TODO NOT set
     // Device Appearance
     #if (BLE_APP_HT)
     cmd->appearance = 728;
@@ -475,7 +479,6 @@ void app_configuration_func(ke_task_id_t const task_id, struct gapm_set_dev_conf
     // Device Appearance
     cmd->appearance = 0x0000;
     #endif
-
     // Device Appearance write permission requirements for peer device
     cmd->appearance_write_perm = GAPM_WRITE_DISABLE;
     // Device Name write permission requirements for peer device

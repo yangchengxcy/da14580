@@ -60,7 +60,7 @@
 #endif
 
 #if (BLE_APP_YCOM_PROX_HOST)
-#include "app_ycom_host_proj.h"
+#include "app_proxr_proj.h"
 #endif
 
 /*

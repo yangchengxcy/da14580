@@ -40,6 +40,7 @@
 #include "ke_task.h"        // Kernel Task
 #include "ke_msg.h"         // Kernel Message
 #include "gapm_task.h"        // 
+#include "proxm_task.h"       //randy 20140415
 #include "gapc_task.h"        //
 #include "app_api.h"
 #include <stdint.h>         // Standard Integer
@@ -122,8 +123,6 @@ extern const struct ke_state_handler app_default_handler;
 
 extern ke_state_t app_state[APP_IDX_MAX];
 
-
-
 /*
  * FUNCTION DECLARATIONS
  ****************************************************************************************
@@ -133,6 +132,11 @@ int gapm_adv_report_ind_handler(ke_msg_id_t msgid,
                                 struct gapm_adv_report_ind *param,
                                 ke_task_id_t dest_id,
                                 ke_task_id_t src_id);
+																
+int proxm_enable_cfm_handler(ke_msg_id_t msgid,
+	                            struct proxm_enable_cfm *param,
+                              ke_task_id_t dest_id,
+                              ke_task_id_t src_id);																
 #endif
 /**
  ****************************************************************************************
@@ -161,7 +165,7 @@ int gapm_cmp_evt_handler(ke_msg_id_t const msgid,
  ****************************************************************************************
  */
 int gapc_connection_req_ind_handler(ke_msg_id_t const msgid,
-                                           struct gapc_connection_req_ind const *param,
+                                            struct gapc_connection_req_ind  *param,
                                            ke_task_id_t const dest_id,
                                            ke_task_id_t const src_id);
                                            

@@ -41,6 +41,10 @@
 #include "pll_vcocal_lut.h"
 #include "periph_setup.h"
 
+#if(ROLE_MASTER_YCOM)
+bool existence_flag=false;
+#endif
+
 #if PLF_UART
 #include "uart.h"       // UART initialization
 #endif //PLF_UART
@@ -573,10 +577,21 @@ int main_func(void)
 #ifndef FPGA_USED            
                 uint8_t ble_evt_end_set = ke_event_get(KE_EVENT_BLE_EVT_END); // BLE event end is set. conditional RF calibration can run.
 #endif                
-                rwip_schedule(); 
+                rwip_schedule();	
 #if (ROLE_MASTER_YCOM)
-				                app_connect(0);
-								app_connect(9);
+				         
+				         if(existence_flag==1)
+								 {
+									//GPIO_ConfigurePin( GPIO_PORT_1, GPIO_PIN_1, OUTPUT, PID_GPIO, true ); //Alert LED
+								 }
+								 else
+								 {
+									 ;
+								 }
+				        // app_connect(0);
+								//app_connect(9);
+				
+				
 #endif
 #ifndef FPGA_USED            
    

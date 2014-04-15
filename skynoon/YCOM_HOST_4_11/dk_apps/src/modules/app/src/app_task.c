@@ -43,6 +43,7 @@
 #include "app_task_handlers.h"
 #undef APP_TASK_HANDLERS_INCLUDE
 
+#if(ROLE_MASTER_YCOM)
 extern struct xapp_env_tag xapp_env;    //randy
 extern  unsigned char app_device_recorded(struct bd_addr *padv_addr);  //randy
 extern void GPIO_SetActive( GPIO_PORT port, GPIO_PIN pin );
@@ -52,6 +53,15 @@ extern void GPIO_SetActive( GPIO_PORT port, GPIO_PIN pin );
 #define GPIO_ALERT_LED2_PIN     GPIO_PIN_3
 
 extern void app_cancel(void);
+extern bool bdaddr_compare(struct bd_addr *bd_address1,
+                    struct bd_addr *bd_address2);
+extern void app_proxm_enable(void);
+extern void app_disc_enable(void);
+extern void app_security_enable(void);
+extern void app_start_encryption(void);
+extern void app_proxm_read_txp(void);
+extern bool existence_flag;
+#endif
 /*
  * FUNCTION DEFINITIONS
  ****************************************************************************************
@@ -80,9 +90,7 @@ int gapm_device_ready_ind_handler(ke_msg_id_t const msgid,
         // reset the lower layers.
         struct gapm_reset_cmd* cmd = KE_MSG_ALLOC(GAPM_RESET_CMD, TASK_GAPM, TASK_APP,
                 gapm_reset_cmd);
-     
         cmd->operation = GAPM_RESET;
-				
 #if (ROLE_MASTER_YCOM)			
 				xapp_env.state = XAPP_IDLE;  
          //init scan devices list
@@ -98,8 +106,7 @@ int gapm_device_ready_ind_handler(ke_msg_id_t const msgid,
 
     }
 #endif
-		
-        ke_msg_send(cmd);
+        ke_msg_send(cmd);		
     }
     else
     {
@@ -130,6 +137,19 @@ void app_inq(void)                  //randy
     struct gapm_start_scan_cmd *cmd = KE_MSG_ALLOC(GAPM_START_SCAN_CMD, TASK_GAPM, TASK_APP,
                                                  gapm_start_scan_cmd);
 
+		 int i;	//app_env.xxx changed to xapp --randy
+    //init scan devices list
+    xapp_env.num_of_devices = 0;
+	
+    for (i=0; i < MAX_SCAN_DEVICES; i++)
+    {
+        
+        xapp_env.devices[i].free = true;
+        xapp_env.devices[i].adv_addr.addr[0] = '\0';
+        xapp_env.devices[i].data[0] = '\0';
+        xapp_env.devices[i].data_len = 0;
+        xapp_env.devices[i].rssi = 0;
+    }
     //init scan devices list
 
     cmd->mode = GAP_GEN_DISCOVERY;
@@ -138,24 +158,20 @@ void app_inq(void)                  //randy
     cmd->filter_duplic = SCAN_FILT_DUPLIC_EN;
     cmd->interval = 10;
     cmd->window = 5;
-   
-    ke_msg_send(cmd);
-	xapp_env.state=XAPP_SCAN;	
 
+    ke_msg_send(cmd);
     return;
 }
 
 void app_connect(unsigned char indx)
 {
-	
 	  if (xapp_env.devices[indx].free == true)
     {
         return;
     }
     struct gapm_start_connection_cmd *cmd= KE_MSG_ALLOC(GAPM_START_CONNECTION_CMD , TASK_GAPM, TASK_APP,gapm_start_connection_cmd );                                              
-
-    //cmd->nb_peers = 1;
-    cmd->nb_peers = 0;
+    cmd->nb_peers = 1;
+    //cmd->nb_peers = 0;
     memcpy((void *) &cmd->peers[0].addr, (void *)&xapp_env.devices[indx].adv_addr.addr, BD_ADDR_LEN);
     cmd->con_intv_min = 100;
     cmd->con_intv_max = 100;
@@ -167,10 +183,10 @@ void app_connect(unsigned char indx)
     cmd->superv_to = 0x1F4;// 500 -> 5000 ms ;
     cmd->scan_interval = 0x180;
 		cmd->scan_window = 0x160;
-    //cmd->op.code = GAPM_CONNECTION_DIRECT;
-    cmd->op.code = GAPM_CONNECTION_AUTO; //自动连接
-
+    cmd->op.code = GAPM_CONNECTION_DIRECT;
+    //cmd->op.code = GAPM_CONNECTION_AUTO; //自动连接		
     ke_msg_send(cmd);
+	
 		
 }
 
@@ -179,18 +195,30 @@ int gapm_adv_report_ind_handler(ke_msg_id_t msgid,
                                 struct gapm_adv_report_ind *param,
                                 ke_task_id_t dest_id,
                                 ke_task_id_t src_id)
-{
+{	
+	
  unsigned char recorded;
- 
+
+	//unsigned char  i;
     if (xapp_env.state != XAPP_SCAN)
         return -1;
 
         recorded = app_device_recorded(&param->report.adv_addr); //only 0 and 9 active mack
-
+		/*
+        if(recorded<5)
+				{
+			  	  GPIO_ConfigurePin( GPIO_PORT_1, GPIO_PIN_1, OUTPUT, PID_GPIO, false ); //Alert LED
+				    GPIO_ConfigurePin( GPIO_PORT_1, GPIO_PIN_2, OUTPUT, PID_GPIO, false ); //Alert LED
+				}
+				if(recorded>=20)
+				{
+				   // GPIO_ConfigurePin( GPIO_PORT_1, GPIO_PIN_1, OUTPUT, PID_GPIO, true ); //Alert LED
+				   // GPIO_ConfigurePin( GPIO_PORT_1, GPIO_PIN_2, OUTPUT, PID_GPIO, true ); //Alert LED
+				}*/
         if (recorded <MAX_SCAN_DEVICES) //update Name
         {
+
             app_find_device_name(param->report.data,param->report.data_len, recorded); 
-            //ConsoleScan();
         }
         else
         {
@@ -198,12 +226,22 @@ int gapm_adv_report_ind_handler(ke_msg_id_t msgid,
             xapp_env.devices[xapp_env.num_of_devices].rssi = (char)(((479 * param->report.rssi)/1000) - 112.5) ;
             memcpy(xapp_env.devices[xapp_env.num_of_devices].adv_addr.addr, param->report.adv_addr.addr, BD_ADDR_LEN );
             app_find_device_name(param->report.data,param->report.data_len, xapp_env.num_of_devices); 
-            //ConsoleScan();
+            //app_find_device_name(param->report.data,param->report.data_len, i); 
             xapp_env.num_of_devices++;
-        }       
+					
+         }
+				
+				if( xapp_env.num_of_devices!=0)
+				{
+					existence_flag=1;
 
-    return 0;
-
+				}
+				else
+				{
+					existence_flag=0;
+				}
+				
+				return 0;
 		
 }				
 #endif
@@ -242,6 +280,7 @@ int gapm_cmp_evt_handler(ke_msg_id_t const msgid,
                 app_configuration_func(dest_id, cmd);
 	
                 ke_msg_send(cmd);
+
             }
         }
         break;
@@ -256,44 +295,25 @@ int gapm_cmp_evt_handler(ke_msg_id_t const msgid,
             else
             {
 #if (ROLE_MASTER_YCOM)
-				
+				xapp_env.state=XAPP_SCAN;	
 				app_inq();			//主模式		开启扫描
 #else
         app_set_dev_config_complete_func();//从模式
 #endif
-
             }
         }
         break;
 #if (ROLE_MASTER_YCOM)
         case GAPM_SCAN_ACTIVE:
 				{
-					     // if(xapp_env.state==XAPP_IDLE)
-							//	{
-					        app_connect(0);
-								  app_connect(9);
-//								  app_connect(3);
-
-								//}
-								//else if (xapp_env.state == XAPP_SCAN)
-								//{
-								//app_cancel();
-								//}
-
+					    xapp_env.state = XAPP_IDLE;
+					    app_connect(0);//connect to number 1
 				}
 				break;
 				case GAPM_SCAN_PASSIVE:
 				{
-					      //if(xapp_env.state==XAPP_IDLE)
-								//{
-					         app_connect(0);
-								   app_connect(9);
-	//							   app_connect(3);
-							//	}
-								//else if (xapp_env.state == XAPP_SCAN)
-							//	{
-									 app_cancel();
-							//	}
+						//xapp_env.state = XAPP_IDLE;
+						//app_connect(0);//connect to number 1
 				}
 				break;
 #endif     					
@@ -343,12 +363,59 @@ int gapm_cmp_evt_handler(ke_msg_id_t const msgid,
  * @return If the message was consumed or not.
  ****************************************************************************************
  */
+
+unsigned int start_pair;
 int gapc_connection_req_ind_handler(ke_msg_id_t const msgid,
-                                           struct gapc_connection_req_ind const *param,
+                                           struct gapc_connection_req_ind *param,
                                            ke_task_id_t const dest_id,
                                            ke_task_id_t const src_id)
 {
+
+#if (ROLE_MASTER_YCOM)
+	 int i;
+    start_pair = 1;
+
+    if (xapp_env.state == XAPP_IDLE)
+    {
+        // We are now connected
+
+        xapp_env.state = APP_CONNECTED;
+
+        // Retrieve the connection index from the GAPC task instance for this connection
+        xapp_env.proxr_device.device.conidx = KE_IDX_GET(src_id);
+
+        // Retrieve the connection handle from the parameters
+        xapp_env.proxr_device.device.conhdl = param->conhdl;
+
+        // On Reconnection check if device is bonded and send pairing request. Otherwise it is not bonded.
+        if (bdaddr_compare(&xapp_env.proxr_device.device.adv_addr, &param->peer_addr))
+        {
+            if (xapp_env.proxr_device.bonded)
+                start_pair = 0;
+        }
+		    memcpy(xapp_env.proxr_device.device.adv_addr.addr, param->peer_addr.addr, sizeof( struct bd_addr));
+
+        for (i =0 ; i<RSSI_SAMPLES; i++)
+            xapp_env.proxr_device.rssi[i] =(char) -127;
+
+        xapp_env.proxr_device.alert = 0;
+        xapp_env.proxr_device.rssi_indx = 0;
+        xapp_env.proxr_device.avg_rssi =(char)-127;
+        xapp_env.proxr_device.txp =(char) -127;
+        xapp_env.proxr_device.llv = 0xFF;
+        memset(&xapp_env.proxr_device.dis, 0, sizeof(dis_env));
+         //GPIO_ConfigurePin( GPIO_PORT_1, GPIO_PIN_1, OUTPUT, PID_GPIO, true);//Alert LED       
+        app_connect_confirm(GAP_AUTH_REQ_NO_MITM_NO_BOND);
+
+        app_proxm_enable();
+        app_disc_enable();
+	
+		}
+    return 0;
+#else
+	
     // Connection Index
+
     if (ke_state_get(dest_id) == APP_CONNECTABLE)
     {
         app_env.conidx = KE_IDX_GET(src_id);
@@ -360,8 +427,9 @@ int gapc_connection_req_ind_handler(ke_msg_id_t const msgid,
         // APP_CONNECTABLE state is used to wait the GAP_LE_CREATE_CONN_REQ_CMP_EVT message
         ASSERT_ERR(0);
     }
+		return (KE_MSG_CONSUMED);
+#endif
 
-    return (KE_MSG_CONSUMED);
 }
 
 
@@ -484,6 +552,36 @@ int app_module_init_cmp_evt_handler(ke_msg_id_t const msgid,
 
     return (KE_MSG_CONSUMED);
 }
+
+#if(ROLE_MASTER_YCOM)
+int  proxm_enable_cfm_handler(ke_msg_id_t msgid,
+                              struct proxm_enable_cfm *param,
+                              ke_task_id_t dest_id,
+                              ke_task_id_t src_id)
+{
+    if (param->status == CO_ERROR_NO_ERROR)
+    {
+        //initialize proximity reporter's values to non valid
+        xapp_env.proxr_device.llv = 0xFF;
+        xapp_env.proxr_device.txp = 0xFF;
+            
+
+       // ConsoleConnected(1);
+
+        if (start_pair)
+        {
+            xapp_env.proxr_device.bonded = 0;
+            app_security_enable();
+        }
+        else
+           app_start_encryption();
+			}
+
+    app_proxm_read_txp();
+
+    return 0;
+}
+#endif
 
 /*
  * GLOBAL VARIABLES DEFINITION

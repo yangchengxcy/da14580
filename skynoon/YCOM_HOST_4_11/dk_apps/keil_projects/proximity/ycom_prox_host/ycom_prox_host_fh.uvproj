@@ -894,16 +894,6 @@
               <FilePath>.\..\..\..\src\modules\app\src\app_task.c</FilePath>
             </File>
             <File>
-              <FileName>app_batt.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\src\modules\app\src\app_profiles\bass\app_batt.c</FilePath>
-            </File>
-            <File>
-              <FileName>app_batt_task.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\src\modules\app\src\app_profiles\bass\app_batt_task.c</FilePath>
-            </File>
-            <File>
               <FileName>app_findme.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\src\modules\app\src\app_profiles\findme\app_findme.c</FilePath>
@@ -937,6 +927,16 @@
               <FileName>app_proxr_proj.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\src\modules\app\src\app_project\ycom_prox_host\app_proxr_proj.c</FilePath>
+            </File>
+            <File>
+              <FileName>app_disc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\src\modules\app\src\app_profiles\disc\app_disc.c</FilePath>
+            </File>
+            <File>
+              <FileName>app_disc_task.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\src\modules\app\src\app_profiles\disc\app_disc_task.c</FilePath>
             </File>
           </Files>
         </Group>

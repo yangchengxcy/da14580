@@ -924,19 +924,19 @@
               <FilePath>..\..\..\src\modules\app\src\app_profiles\prox_monitor\app_proxm_task.c</FilePath>
             </File>
             <File>
-              <FileName>app_dis.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\src\modules\app\src\app_profiles\diss\app_dis.c</FilePath>
-            </File>
-            <File>
-              <FileName>app_dis_task.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\src\modules\app\src\app_profiles\diss\app_dis_task.c</FilePath>
-            </File>
-            <File>
               <FileName>app_proxm_proj.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\src\modules\app\src\app_project\prox_monitor_fh\app_proxm_proj.c</FilePath>
+            </File>
+            <File>
+              <FileName>app_disc_task.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\src\modules\app\src\app_profiles\disc\app_disc_task.c</FilePath>
+            </File>
+            <File>
+              <FileName>app_disc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\src\modules\app\src\app_profiles\disc\app_disc.c</FilePath>
             </File>
           </Files>
         </Group>

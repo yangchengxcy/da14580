@@ -40,8 +40,9 @@
 #if (NVDS_SUPPORT)
 #include "nvds.h"                    // NVDS Definitions
 #endif //(NVDS_SUPPORT)
-
-
+#if(ROLE_MASTER_YCOM)
+   uint8_t last_char = 0xFF;//randy  20140415
+#endif
   
 /*
  * ENUMERATIONS
@@ -84,6 +85,89 @@ bool bdaddr_compare(struct bd_addr *bd_address1,
     return(true);
 }	
 
+void app_proxm_enable(void)
+{
+        
+    // Allocate the message
+    struct proxm_enable_req *msg = KE_MSG_ALLOC(PROXM_ENABLE_REQ, TASK_PROXM, TASK_APP,
+                                                 proxm_enable_req);
+
+    // Fill in the parameter structure
+    msg->conhdl = xapp_env.proxr_device.device.conhdl;
+    msg->con_type = PRF_CON_DISCOVERY;
+        
+    // Send the message
+     ke_msg_send(msg);
+
+}
+void app_disc_enable(void)
+{       
+    // Allocate the message
+    struct proxm_enable_req * msg = KE_MSG_ALLOC(DISC_ENABLE_REQ, TASK_DISC, TASK_APP,
+                                                proxm_enable_req);
+
+    // Fill in the parameter structure
+    msg->conhdl = xapp_env.proxr_device.device.conhdl;
+    msg->con_type = PRF_CON_DISCOVERY;
+        
+    // Send the message
+    ke_msg_send(msg);
+
+}
+void app_security_enable(void)
+{
+    // Allocate the message
+    struct gapc_bond_cmd * req = KE_MSG_ALLOC(GAPC_BOND_CMD, KE_BUILD_ID(TASK_GAPC, xapp_env.proxr_device.device.conidx), TASK_APP,
+                                             gapc_bond_cmd);
+    
+
+    req->operation = GAPC_BOND;
+
+    req->pairing.sec_req = GAP_NO_SEC;  //GAP_SEC1_NOAUTH_PAIR_ENC;
+
+    // OOB information
+    req->pairing.oob = GAP_OOB_AUTH_DATA_NOT_PRESENT;
+
+    // IO capabilities
+    req->pairing.iocap          = GAP_IO_CAP_NO_INPUT_NO_OUTPUT;
+
+    // Authentication requirements
+    req->pairing.auth           = GAP_AUTH_REQ_NO_MITM_BOND; //SMP_AUTH_REQ_NO_MITM_NO_BOND;
+
+    // Encryption key size
+    req->pairing.key_size       = 16;
+
+    //Initiator key distribution
+    req->pairing.ikey_dist      = 0x04; //SMP_KDIST_ENCKEY | SMP_KDIST_IDKEY | SMP_KDIST_SIGNKEY;
+		req->pairing.rkey_dist      = 0x03; //SMP_KDIST_ENCKEY | SMP_KDIST_IDKEY | SMP_KDIST_SIGNKEY;
+
+    // Send the message
+     ke_msg_send(req);
+}
+void app_start_encryption(void)
+{
+    // Allocate the message
+    struct gapc_encrypt_cmd * req = KE_MSG_ALLOC(GAPC_ENCRYPT_CMD, KE_BUILD_ID(TASK_GAPC, xapp_env.proxr_device.device.conidx), TASK_APP,
+                                                 gapc_encrypt_cmd);
+
+
+    req->operation = GAPC_ENCRYPT;
+    memcpy(&req->ltk.ltk, &xapp_env.proxr_device.ltk, sizeof(struct gapc_ltk));
+    
+    // Send the message
+    ke_msg_send(req);
+
+}
+void app_proxm_read_txp(void)
+{
+    struct proxm_rd_txpw_lvl_req * req = KE_MSG_ALLOC(PROXM_RD_TXPW_LVL_REQ, TASK_PROXM, TASK_APP,
+                                                     proxm_rd_txpw_lvl_req);
+    
+    last_char = PROXM_RD_TX_POWER_LVL;
+    
+    req->conhdl = xapp_env.proxr_device.device.conhdl;
+    ke_msg_send((void *) req);
+}
 void app_cancel(void)
 {
     
@@ -106,7 +190,7 @@ unsigned char app_device_recorded(struct bd_addr *padv_addr)
     for (i=0; i < MAX_SCAN_DEVICES; i++)
     {
         if (xapp_env.devices[i].free == false)
-if (bdaddr_compare(&xapp_env.devices[i].adv_addr, padv_addr))
+        if (bdaddr_compare(&xapp_env.devices[i].adv_addr, padv_addr))
                 break;
     }
 
@@ -143,7 +227,7 @@ void app_init(void)
         app_env.sec_en = true;
     }
 
-	app_init_func();    
+	  app_init_func();    
 		
     // Create APP task
     ke_task_create(TASK_APP, &TASK_DESC_APP);
@@ -216,6 +300,7 @@ void app_connect_confirm(uint8_t auth)
 
     // Send the message
     ke_msg_send(cfm);
+		GPIO_ConfigurePin( GPIO_PORT_1, GPIO_PIN_1, OUTPUT, PID_GPIO, true);//Alert LED  
 }
 
 

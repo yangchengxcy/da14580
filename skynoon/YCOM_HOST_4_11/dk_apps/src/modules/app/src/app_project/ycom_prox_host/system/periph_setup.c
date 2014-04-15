@@ -47,9 +47,11 @@ void GPIO_reservations(void)
 */    
 #if (BLE_APP_PRESENT)
 #if BLE_PROX_REPORTER
-    RESERVE_GPIO( PUSH_BUTTON, GPIO_PORT_0, GPIO_PIN_6, PID_GPIO);   
-    RESERVE_GPIO( GREEN_LED, GPIO_ALERT_LED_PORT, GPIO_ALERT_LED_PIN, PID_GPIO);
-    RESERVE_GPIO( GREEN_LED, GPIO_ALERT_LED_PORT, GPIO_ALERT_LED1_PIN, PID_GPIO);
+    RESERVE_GPIO( PUSH_BUTTON, GPIO_PORT_2, GPIO_PIN_3, PID_GPIO);
+    RESERVE_GPIO( PUSH_BUTTON, GPIO_PORT_2, GPIO_PIN_6, PID_GPIO);
+    //RESERVE_GPIO( PUSH_BUTTON, GPIO_PORT_2, GPIO_PIN_9, PID_GPIO);   	
+    RESERVE_GPIO( GREEN_LED, GPIO_PORT_1, GPIO_PIN_1, PID_GPIO);
+    RESERVE_GPIO( GREEN_LED, GPIO_PORT_1, GPIO_PIN_2, PID_GPIO);
 
 #endif
 #if BLE_BATT_SERVER
@@ -72,9 +74,11 @@ void set_pad_functions(void)        // set gpio port function mode
 {
     
 #if BLE_PROX_REPORTER
-    GPIO_ConfigurePin( GPIO_BUTTON_PORT, GPIO_BUTTON_PIN, INPUT_PULLUP, PID_GPIO, false ); // Push Button 
-    GPIO_ConfigurePin( GPIO_ALERT_LED_PORT, GPIO_ALERT_LED_PIN, OUTPUT, PID_GPIO, false ); //Alert LED
-    GPIO_ConfigurePin( GPIO_ALERT_LED_PORT, GPIO_ALERT_LED1_PIN, OUTPUT, PID_GPIO, false ); //Alert LED
+    GPIO_ConfigurePin( GPIO_PORT_2, GPIO_PIN_3, INPUT_PULLDOWN, PID_GPIO, false ); // Push Button 
+	  GPIO_ConfigurePin( GPIO_PORT_2, GPIO_PIN_6, INPUT_PULLDOWN, PID_GPIO, false ); // Push Button 
+	  //GPIO_ConfigurePin( GPIO_PORT_2, GPIO_PIN_3, INPUT_PULLDOWN, PID_GPIO, false ); // Push Button 
+    GPIO_ConfigurePin( GPIO_PORT_1, GPIO_PIN_1, OUTPUT, PID_GPIO, false ); //Alert LED
+    GPIO_ConfigurePin( GPIO_PORT_1, GPIO_PIN_2, OUTPUT, PID_GPIO, false ); //Alert LED
 
 #endif
 #if BLE_BATT_SERVER    
@@ -97,6 +101,7 @@ void periph_init(void)  // set i2c, spi, uart, uart2 serial clks
     while (!(GetWord16(SYS_STAT_REG) & PER_IS_UP)) ; 
     
     SetBits16(CLK_16M_REG,XTAL16_BIAS_SH_DISABLE, 1);
+	  SetBits16(P07_MODE_REG, PID, 0x10);//randy
 	
 	//rom patch
 	patch_func();
@@ -108,8 +113,8 @@ void periph_init(void)  // set i2c, spi, uart, uart2 serial clks
 #if (BLE_APP_PRESENT)
     
 #if BLE_PROX_REPORTER
-    app_proxr_port_reinit(GPIO_ALERT_LED_PORT, GPIO_ALERT_LED_PIN);
-    app_proxr_port_reinit(GPIO_ALERT_LED_PORT, GPIO_ALERT_LED1_PIN);
+    app_proxr_port_reinit(GPIO_PORT_1, GPIO_PIN_1);
+    app_proxr_port_reinit(GPIO_PORT_1, GPIO_PIN_2);
 	app_button_enable();
 #elif BLE_FINDME_LOCATOR
     app_button_enable();

@@ -40,7 +40,8 @@
 #include <co_bt.h>           // Common BT Definitions
 
 #include "arch.h"            // Platform Definitions
-
+#include "prf_types.h"       //randy 20140414
+#include "proxm_task.h"
 /*
  * DEFINES
  ****************************************************************************************
@@ -84,10 +85,40 @@
 #endif
 
 #define MAX_SCAN_DEVICES 9 //randy
+#define RSSI_SAMPLES	 5   //randy
+#define DIS_VAL_MAX_LEN                         (0x12)
 /*
  * TYPE DEFINITIONS
  ****************************************************************************************
  */
+ enum
+{
+    DISC_MANUFACTURER_NAME_CHAR,
+    DISC_MODEL_NB_STR_CHAR,
+    DISC_SERIAL_NB_STR_CHAR,
+    DISC_HARD_REV_STR_CHAR,
+    DISC_FIRM_REV_STR_CHAR,
+    DISC_SW_REV_STR_CHAR,
+    DISC_SYSTEM_ID_CHAR,
+    DISC_IEEE_CHAR,
+    DISC_PNP_ID_CHAR,
+
+    DISC_CHAR_MAX,
+};
+enum
+{
+    /// Start the find me locator profile - at connection
+    DISC_ENABLE_REQ = KE_FIRST_MSG(TASK_DISC),
+    /// Confirm that cfg connection has finished with discovery results, or that normal cnx started
+    DISC_ENABLE_CFM,
+    /// Inform APP that the profile client role has been disabled after a disconnection
+    DISC_DISABLE_IND,
+
+    /// Generic message to read a DIS characteristic value
+    DISC_RD_CHAR_REQ,
+    /// Generic message for read responses for APP
+    DISC_RD_CHAR_RSP,
+};
  typedef struct           //randy
 {
     unsigned char free;
@@ -99,16 +130,25 @@
     unsigned char  data_len;
     unsigned char  data[ADV_DATA_LEN + 1];
 } ble_dev;
-
+typedef struct 
+{
+    uint16_t    val_hdl;
+    uint8_t     val[DIS_VAL_MAX_LEN + 1];
+    uint16_t    len;
+} dis_char;
 //Proximity Reporter connected device
-/*
+typedef struct 
+{
+   dis_char chars[DISC_CHAR_MAX];
+} dis_env;
 typedef struct                       //randy
 {
     ble_dev device;
     unsigned char bonded;
     unsigned short ediv;
    // struct rand_nb rand_nb[RAND_NB_LEN];
-   // struct gapc_ltk ltk;
+   //truct gapc_ltk ltk;
+	  char ltk;        //randy 20140415
    // struct gapc_irk irk;
    // struct gap_sec_key csrk;
     unsigned char llv;
@@ -118,14 +158,14 @@ typedef struct                       //randy
     char avg_rssi;
     unsigned char alert;
     dis_env dis;
-} proxr_dev;*/
+} proxr_dev;
  /// application environment structure
 struct xapp_env_tag   //randy
 {
     unsigned char state;
     unsigned char num_of_devices;
     ble_dev devices[MAX_SCAN_DEVICES];
-    //proxr_dev proxr_device;
+    proxr_dev proxr_device;
 };
 /// Application environment structure
 struct app_env_tag

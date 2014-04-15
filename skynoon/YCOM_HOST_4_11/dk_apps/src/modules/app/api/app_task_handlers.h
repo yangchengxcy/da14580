@@ -54,6 +54,7 @@ EXTERN const struct ke_msg_handler app_default_state[] =
 		
 #if (ROLE_MASTER_YCOM)
 		{GAPM_ADV_REPORT_IND,                   (ke_msg_func_t)gapm_adv_report_ind_handler},//randy
+		{PROXM_ENABLE_CFM,                      (ke_msg_func_t)proxm_enable_cfm_handler},   //randy
 #endif
     {GAPC_CONNECTION_REQ_IND,               (ke_msg_func_t)gapc_connection_req_ind_handler},
     {GAPC_DISCONNECT_IND,                   (ke_msg_func_t)gapc_disconnect_ind_handler},

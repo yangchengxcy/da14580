@@ -144,7 +144,7 @@ void app_proxr_alert_stop(void)
 	alert_state.blink_timeout = 0;
 	alert_state.blink_toggle = 0;
 	
-    GPIO_SetInactive( alert_state.port, alert_state.pin);
+    //GPIO_SetInactive( alert_state.port, alert_state.pin);
 	
     ke_timer_clear(APP_PXP_TIMER, TASK_APP);
 }
@@ -211,7 +211,6 @@ void app_proxr_port_reinit(GPIO_PORT port, GPIO_PIN pin)
 	else{
         GPIO_SetInactive( alert_state.port, alert_state.pin);
 	}
-	
 }
 
 #endif //BLE_PROXR
